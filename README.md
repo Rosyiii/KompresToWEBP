@@ -40,6 +40,14 @@ Sistem ini didesain dengan konsep zero-configuration secara default:
 
 ## 💻 Panduan Penggunaan & Contoh Perintah CLI
 
+### 0. Melihat Panduan & Bantuan CLI (`--help` / `-h`)
+Melihat daftar seluruh perintah, opsi, dan nilai default langsung dari terminal:
+```bash
+python main.py --help
+# atau versi singkat:
+python main.py -h
+```
+
 ### 1. Konversi Default (Batch Mode)
 Memproses seluruh gambar di dalam folder `input/` ke folder `output/` dengan kualitas standar (80):
 ```bash
@@ -115,6 +123,7 @@ python main.py -m 0
 
 | Argumen Singkat | Argumen Panjang | Tipe Data | Nilai Default | Keterangan |
 | :--- | :--- | :--- | :--- | :--- |
+| `-h` | `--help` | Flag | - | Tampilkan panduan bantuan dan daftar seluruh argumen |
 | `-i` | `--input` | String | `input/` | Path folder sumber gambar |
 | `-o` | `--output` | String | `output/` | Path folder tujuan hasil konversi |
 | `-f` | `--file` | String | `None` | Path ke berkas spesifik (mode single-file) |

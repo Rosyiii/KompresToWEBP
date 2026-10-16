@@ -191,6 +191,14 @@ Sistem ini didesain dengan konsep zero-configuration secara default:
 
 ## 💻 Panduan Penggunaan & Contoh Perintah CLI
 
+### 0. Melihat Panduan & Bantuan CLI (`--help` / `-h`)
+Melihat daftar seluruh perintah, opsi, dan nilai default langsung dari terminal:
+```bash
+python main.py --help
+# atau versi singkat:
+python main.py -h
+```
+
 ### 1. Konversi Default (Batch Mode)
 Memproses seluruh gambar di dalam folder `input/` ke folder `output/` dengan kualitas standar (80):
 ```bash
@@ -247,15 +255,17 @@ python main.py -i "galeri/" -o "galeri_webp/" --recursive
 
 | Argumen Singkat | Argumen Panjang | Tipe Data | Nilai Default | Keterangan |
 | :--- | :--- | :--- | :--- | :--- |
+| `-h` | `--help` | Flag | - | Tampilkan panduan bantuan dan daftar seluruh argumen |
 | `-i` | `--input` | String | `input/` | Path folder sumber gambar |
 | `-o` | `--output` | String | `output/` | Path folder tujuan hasil konversi |
 | `-f` | `--file` | String | `None` | Path ke berkas spesifik (mode single-file) |
 | `-q` | `--quality` | Integer | `80` | Kualitas kompresi WebP (1 - 100) |
-| `-l` | `--lossless` | Flag | `False` | Aktifkan kompresi tanpa penurunan kualitas |
-| `-w` | `--overwrite` | Flag | `False` | Timpa berkas jika nama target sudah ada |
+| `-l` | `--lossless` | Flag | `False` | Aktifkan kompresi tanpa penurunan kualitas (lossless) |
+| `-w` | `--overwrite` | Flag | `True` | Timpa berkas jika nama target sudah ada (Default: AKTIF) |
+| | `--no-overwrite` | Flag | - | Lewati berkas jika sudah ada di folder output |
 | `-r` | `--recursive` | Flag | `False` | Pindai subfolder secara rekursif |
-| `-m` | `--method` | Integer | `6` | Kompresi effort (0=tercepat, 6=terbaik) |
-| `-L` | `--limit` | Integer | `None` | Batas maksimum berkas yang diproses (unlimited jika kosong) |
+| `-m` | `--method` | Integer | `6` | Usaha kompresi (0=tercepat, 6=paling optimal/kecil) |
+| `-L` | `--limit` | Integer | `None` | Batasi jumlah berkas yang dieksekusi (diurutkan ASC) |
 ````
 
 ---
