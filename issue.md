@@ -59,49 +59,51 @@ Kompresor to WEBP/
 Berikut urutan pengerjaan sekuensial yang harus dieksekusi oleh developer/model pelaksana. Berikan tanda centang `[x]` setelah setiap tahapan teruji dengan baik.
 
 ### Phase 1: Environment & Project Setup
-- [ ] **Step 1.1**: Buat berkas `requirements.txt` yang memuat:
+- [x] **Step 1.1**: Buat berkas `requirements.txt` yang memuat:
   ```text
   Pillow>=10.2.0
   rich>=13.7.0
   ```
-- [ ] **Step 1.2**: Buat struktur modul Python (`converter/__init__.py`, `converter/engine.py`, `converter/validator.py`, `main.py`).
+- [x] **Step 1.2**: Buat struktur modul Python (`converter/__init__.py`, `converter/engine.py`, `converter/validator.py`, `main.py`).
 
 ### Phase 2: Directory Bootstrapping & CLI Interface
-- [ ] **Step 2.1**: Implementasikan fungsi bootstrapping direktori pada `main.py`:
+- [x] **Step 2.1**: Implementasikan fungsi bootstrapping direktori pada `main.py`:
   - Sistem harus memeriksa keberadaan folder `input/` dan `output/`.
   - Jika belum ada, buat direktori tersebut menggunakan `Path("input").mkdir(parents=True, exist_ok=True)` dan `Path("output").mkdir(parents=True, exist_ok=True)`.
-- [ ] **Step 2.2**: Bangun antarmuka CLI pada `main.py` menggunakan `argparse.ArgumentParser` dengan argumen berikut:
+- [x] **Step 2.2**: Bangun antarmuka CLI pada `main.py` menggunakan `argparse.ArgumentParser` dengan argumen berikut:
   - `-i`, `--input`: Path direktori input kustom (default: `input/`).
   - `-o`, `--output`: Path direktori output kustom (default: `output/`).
   - `-f`, `--file`: Path berkas tunggal yang akan dikonversi (opsional, mematikan mode batch direktori jika didefinisikan).
   - `-q`, `--quality`: Faktor kualitas WebP (tipe: `int`, rentang: 1–100, default: `80`).
   - `-l`, `--lossless`: Flag boolean untuk mengaktifkan kompresi *lossless* WebP (default: `False`).
-  - `-w`, `--overwrite`: Flag boolean untuk menimpa berkas jika berkas output dengan nama yang sama sudah ada di folder tujuan (default: `False`).
+  - `-w`, `--overwrite`: Flag boolean untuk menimpa berkas jika berkas output dengan nama yang sama sudah ada di folder tujuan (default: `True`).
+  - `--no-overwrite`: Flag boolean untuk melewati berkas yang sudah ada tanpa menimpa.
   - `-r`, `--recursive`: Flag boolean untuk memindai subfolder secara rekursif dalam mode direktori (default: `False`).
   - `-m`, `--method`: Tingkat usaha kompresi WebP (rentang 0-6, default: `6` untuk kompresi terbaik).
-  - `-L`, `--limit`: Batasi jumlah maksimum berkas yang diproses dalam satu sesi batch (tipe: `int`, default: `None` / tanpa batas). Sangat berguna untuk pengujian cepat (*trial run*) pada folder berisi ribuan gambar.
+  - `-L`, `--limit`: Batasi jumlah maksimum berkas yang diproses setelah seluruh berkas diurutkan secara alfabetis (ASC).
 
 ### Phase 3: File Scanning, Streaming Generator & Case-Insensitive Validation
-- [ ] **Step 3.1**: Daftarkan ekstensi yang didukung ke dalam format tuple lowercase:
+- [x] **Step 3.1**: Daftarkan ekstensi yang didukung ke dalam format tuple lowercase:
   ```python
   SUPPORTED_EXTENSIONS = ('.png', '.jpg', '.jpeg', '.jpe')
   ```
-- [ ] **Step 3.2**: Buat generator pemindai berkas hemat memori (*lazy generator*) pada `converter/validator.py`:
-  - Gunakan `pathlib.Path.glob` (atau `rglob` jika `--recursive` aktif) yang menghasilkan *iterator/generator*, **bukan memuat semua file ke dalam list memory**.
+- [x] **Step 3.2**: Buat generator pemindai berkas pada `converter/validator.py`:
+  - Gunakan `pathlib.Path.glob` (atau `rglob` jika `--recursive` aktif).
   - Lakukan normalisasi ekstensi menggunakan `.suffix.lower()`.
   - Pastikan ekstensi `.jpe` (uppercase/lowercase/mixed case seperti `.JPE`, `.Jpe`) terdeteksi sama validnya dengan `.jpg` atau `.png`.
-  - Jika argumen `--limit` aktif, potong aliran generator menggunakan `itertools.islice(generator, limit)` agar pemrosesan langsung berhenti setelah mencapai kuota tanpa membaca sisa ribuan file lainnya.
+  - Urutkan seluruh berkas secara alfabetis menaik (Ascending / ASC).
+  - Jika argumen `--limit` aktif, potong daftar sesuai kuota batas yang diminta pengguna dan laporkan jumlah total berkas yang ditemukan vs yang dieksekusi.
   - Filter hanya berkas asli (abaikan sub-direktori atau symlink yang tidak valid).
 
 ### Phase 4: Image Processing & Conversion Engine
-- [ ] **Step 4.1**: Implementasikan fungsi pembacaan dan normalisasi gambar pada `converter/engine.py`:
+- [x] **Step 4.1**: Implementasikan fungsi pembacaan dan normalisasi gambar pada `converter/engine.py`:
   - Gunakan `ImageOps.exif_transpose(image)` agar orientasi foto dari metadata kamera EXIF tidak terputar.
   - Tangani variasi kanal warna (*Color Modes*):
     - **Mode `RGBA` & `LA`**: Pertahankan kanal alpha agar transparansi WebP sempurna.
     - **Mode `P` (Palette/Indexed) dengan transparansi**: Konversi secara eksplisit ke `RGBA` via `image.convert("RGBA")` untuk mencegah latar belakang transparan berubah menjadi hitam/artefak.
     - **Mode `CMYK`**: Konversi ke `RGB` via `image.convert("RGB")`. Pustaka WebP tidak mendukung CMYK dan akan melempar `OSError` jika tidak dikonversi terlebih dahulu.
     - **Mode `1` (1-bit pixels)** atau **Mode `L` (Grayscale)**: Konversi atau simpan sesuai kompatibilitas mode WebP.
-- [ ] **Step 4.2**: Eksekusi penyimpanan ke WebP:
+- [x] **Step 4.2**: Eksekusi penyimpanan ke WebP:
   - Bangun nama target output: mengganti ekstensi lama dengan `.webp`.
   - Panggil `image.save()` dengan parameter:
     ```python
@@ -116,24 +118,24 @@ Berikut urutan pengerjaan sekuensial yang harus dieksekusi oleh developer/model 
   - Pastikan instance `Image` ditutup dengan benar (gunakan `with Image.open(...) as img:`) untuk menghindari *file descriptor leak*.
 
 ### Phase 5: Overwrite Protection & Collision Strategy
-- [ ] **Step 5.1**: Periksa apakah berkas target `destination_path.exists()`:
+- [x] **Step 5.1**: Periksa apakah berkas target `destination_path.exists()`:
   - Jika `True` dan flag `--overwrite` **tidak aktif**: Lewati (*skip*) konversi dan cetak pesan peringatan atau berikan nomor indeks pembeda (misal: `nama_file_1.webp`).
   - Jika `True` dan flag `--overwrite` **aktif**: Timpa berkas output.
   - Laporkan status berkas (`CONVERTED`, `SKIPPED`, `OVERWRITTEN`, `FAILED`) ke pencatat statistik.
 
 ### Phase 6: Error Handling & Fault Tolerance
-- [ ] **Step 6.1**: Tangani berkas rusak (*corrupted files*):
+- [x] **Step 6.1**: Tangani berkas rusak (*corrupted files*):
   - Tangkap `PIL.UnidentifiedImageError` dan `IOError` secara terisolasi per berkas sehingga kegagalan satu berkas tidak menghentikan keseluruhan proses batch.
-- [ ] **Step 6.2**: Tangani folder input kosong:
+- [x] **Step 6.2**: Tangani folder input kosong:
   - Jika tidak ada berkas yang cocok dengan `SUPPORTED_EXTENSIONS`, tampilkan pesan informatif berwarna kuning/oranye melalui `rich` dan keluar (*exit status code 0*) tanpa melempar Exception tak tertangani.
-- [ ] **Step 6.3**: Tangani batasan hak akses (*permission error*):
+- [x] **Step 6.3**: Tangani batasan hak akses (*permission error*):
   - Tangkap `PermissionError` saat membaca input atau menulis ke output, lalu berikan pesan instruksi yang jelas kepada pengguna.
-- [ ] **Step 6.4**: Tangani proteksi gambar berukuran raksasa (*Pixel Bomb / Ultra High-Res*):
+- [x] **Step 6.4**: Tangani proteksi gambar berukuran raksasa (*Pixel Bomb / Ultra High-Res*):
   - Tangkap `PIL.Image.DecompressionBombError` jika terdapat gambar beresolusi ekstrem (> 89 megapixel). Catat sebagai status `FAILED` dengan keterangan `Image too large (Pixel Bomb protection)` dan lanjutkan pemrosesan berkas berikutnya tanpa crash.
 
 ### Phase 7: Rich Terminal UI & Summary Reporting
-- [ ] **Step 7.1**: Integrasikan `rich.progress.Progress` untuk visualisasi persentase, estimasi waktu, dan nama berkas yang sedang diproses.
-- [ ] **Step 7.2**: Tampilkan tabel ringkasan akhir (`rich.table.Table`) yang memuat data:
+- [x] **Step 7.1**: Integrasikan `rich.progress.Progress` untuk visualisasi persentase, estimasi waktu, dan nama berkas yang sedang diproses.
+- [x] **Step 7.2**: Tampilkan tabel ringkasan akhir (`rich.table.Table`) yang memuat data:
   - Total berkas yang ditemukan.
   - Jumlah berkas berhasil, dilewati, dan gagal.
   - Akumulasi ukuran file sebelum vs sesudah (dalam KB/MB).
@@ -305,14 +307,14 @@ Developer pelaksana wajib mengantisipasi dan memvalidasi skenario kritis berikut
 
 Fitur dinyatakan **SELESAI (100% COMPLETE)** jika memenuhi seluruh checklist verifikasi berikut:
 
-- [ ] **AC-1 (Auto Directory Bootstrap):** Saat aplikasi dijalankan pertama kali tanpa argumen di direktori kosong, folder `input/` dan `output/` otomatis tercipta tanpa error.
-- [ ] **AC-2 (Format Support):** Sistem berhasil mengonversi berkas `.png`, `.jpg`, `.jpeg`, dan `.jpe` (baik huruf kecil maupun kapital: `.PNG`, `.JPG`, `.JPE`) menjadi berkas berekstensi `.webp`.
-- [ ] **AC-3 (Alpha Channel Integrity):** PNG dengan latar belakang transparan tetap transparan di berkas `.webp` keluaran (tidak terdapat bingkai hitam atau distorsi warna latar).
-- [ ] **AC-4 (Quality Control):** Nilai flag `--quality` berpengaruh nyata terhadap ukuran berkas keluaran (misal: pengujian kualitas 30 menghasilkan ukuran berkas lebih kecil dibanding kualitas 90).
-- [ ] **AC-5 (Single File Mode):** Perintah `python main.py -f <path_ke_file>` hanya mengonversi berkas tersebut ke direktori target tanpa menyentuh berkas lain di folder `input/`.
-- [ ] **AC-6 (Custom Path):** Argumen `-i <custom_input>` dan `-o <custom_output>` bekerja sesuai path yang diberikan pengguna, termasuk path berspasi.
-- [ ] **AC-7 (Crash-Resistant Execution):** Jika di dalam folder input terdapat berkas corrupt, berkas non-gambar dengan ekstensi palsu, atau file berukuran 0-byte, proses batch tidak terhenti dan berkas valid lainnya tetap sukses dikonversi.
-- [ ] **AC-8 (Terminal Summary & UX):** Menampilkan progress bar yang halus dan tabel ringkasan di akhir proses yang menunjukkan jumlah berkas, total penghematan ukuran (*bytes saved* / rasio kompresi), dan waktu pengerjaan.
-- [ ] **AC-9 (Documentation):** Berkas `README.md` terpasang di root direktori dengan panduan lengkap dan contoh perintah siap pakai.
-- [ ] **AC-10 (Batch Scalability & Limit Control):** Pemrosesan batch skala besar (> 1.000 file) berjalan dengan konsumsi memori stabil ($O(1)$ RAM), serta flag `--limit <N>` / `-L <N>` secara presisi membatasi konversi hanya pada N berkas pertama.
+- [x] **AC-1 (Auto Directory Bootstrap):** Saat aplikasi dijalankan pertama kali tanpa argumen di direktori kosong, folder `input/` dan `output/` otomatis tercipta tanpa error.
+- [x] **AC-2 (Format Support):** Sistem berhasil mengonversi berkas `.png`, `.jpg`, `.jpeg`, dan `.jpe` (baik huruf kecil maupun kapital: `.PNG`, `.JPG`, `.JPE`) menjadi berkas berekstensi `.webp`.
+- [x] **AC-3 (Alpha Channel Integrity):** PNG dengan latar belakang transparan tetap transparan di berkas `.webp` keluaran (tidak terdapat bingkai hitam atau distorsi warna latar).
+- [x] **AC-4 (Quality Control):** Nilai flag `--quality` berpengaruh nyata terhadap ukuran berkas keluaran (misal: pengujian kualitas 30 menghasilkan ukuran berkas lebih kecil dibanding kualitas 90).
+- [x] **AC-5 (Single File Mode):** Perintah `python main.py -f <path_ke_file>` hanya mengonversi berkas tersebut ke direktori target tanpa menyentuh berkas lain di folder `input/`.
+- [x] **AC-6 (Custom Path):** Argumen `-i <custom_input>` dan `-o <custom_output>` bekerja sesuai path yang diberikan pengguna, termasuk path berspasi.
+- [x] **AC-7 (Crash-Resistant Execution):** Jika di dalam folder input terdapat berkas corrupt, berkas non-gambar dengan ekstensi palsu, atau file berukuran 0-byte, proses batch tidak terhenti dan berkas valid lainnya tetap sukses dikonversi.
+- [x] **AC-8 (Terminal Summary & UX):** Menampilkan progress bar yang halus dan tabel ringkasan di akhir proses yang menunjukkan jumlah berkas, total penghematan ukuran (*bytes saved* / rasio kompresi), dan waktu pengerjaan.
+- [x] **AC-9 (Documentation):** Berkas `README.md` terpasang di root direktori dengan panduan lengkap dan contoh perintah siap pakai.
+- [x] **AC-10 (Batch Scalability & Limit Control):** Pemrosesan batch skala besar (> 1.000 file) berjalan dengan konsumsi memori stabil ($O(1)$ RAM), serta flag `--limit <N>` / `-L <N>` secara presisi membatasi konversi hanya pada N berkas pertama.
 
