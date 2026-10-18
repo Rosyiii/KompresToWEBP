@@ -76,8 +76,7 @@ Berikut urutan pengerjaan sekuensial yang harus dieksekusi oleh developer/model 
   - `-f`, `--file`: Path berkas tunggal yang akan dikonversi (opsional, mematikan mode batch direktori jika didefinisikan).
   - `-q`, `--quality`: Faktor kualitas WebP (tipe: `int`, rentang: 1–100, default: `80`).
   - `-l`, `--lossless`: Flag boolean untuk mengaktifkan kompresi *lossless* WebP (default: `False`).
-  - `-w`, `--overwrite`: Flag boolean untuk menimpa berkas jika berkas output dengan nama yang sama sudah ada di folder tujuan (default: `True`).
-  - `--no-overwrite`: Flag boolean untuk melewati berkas yang sudah ada tanpa menimpa.
+  - `-w`, `--overwrite`, `--no-overwrite`: Pengaturan penimpaan berkas menggunakan `argparse.BooleanOptionalAction` (default: `True`). Menggunakan `--no-overwrite` untuk melewati berkas yang sudah ada.
   - `-r`, `--recursive`: Flag boolean untuk memindai subfolder secara rekursif dalam mode direktori (default: `False`).
   - `-m`, `--method`: Tingkat usaha kompresi WebP (rentang 0-6, default: `6` untuk kompresi terbaik).
   - `-L`, `--limit`: Batasi jumlah maksimum berkas yang diproses setelah seluruh berkas diurutkan secara alfabetis (ASC).
@@ -261,8 +260,7 @@ python main.py -i "galeri/" -o "galeri_webp/" --recursive
 | `-f` | `--file` | String | `None` | Path ke berkas spesifik (mode single-file) |
 | `-q` | `--quality` | Integer | `80` | Kualitas kompresi WebP (1 - 100) |
 | `-l` | `--lossless` | Flag | `False` | Aktifkan kompresi tanpa penurunan kualitas (lossless) |
-| `-w` | `--overwrite` | Flag | `True` | Timpa berkas jika nama target sudah ada (Default: AKTIF) |
-| | `--no-overwrite` | Flag | - | Lewati berkas jika sudah ada di folder output |
+| `-w` | `--overwrite` / `--no-overwrite` | Boolean Flag | `True` (Aktif) | Timpa berkas jika nama target sudah ada (gunakan `--no-overwrite` untuk melewati) |
 | `-r` | `--recursive` | Flag | `False` | Pindai subfolder secara rekursif |
 | `-m` | `--method` | Integer | `6` | Usaha kompresi (0=tercepat, 6=paling optimal/kecil) |
 | `-L` | `--limit` | Integer | `None` | Batasi jumlah berkas yang dieksekusi (diurutkan ASC) |

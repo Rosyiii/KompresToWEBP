@@ -98,15 +98,9 @@ def parse_arguments() -> argparse.Namespace:
     )
     parser.add_argument(
         "-w", "--overwrite",
-        action="store_true",
+        action=argparse.BooleanOptionalAction,
         default=True,
-        help="Timpa berkas jika berkas output dengan nama yang sama sudah ada (aktif secara default)",
-    )
-    parser.add_argument(
-        "--no-overwrite",
-        dest="overwrite",
-        action="store_false",
-        help="Jangan timpa berkas jika berkas output dengan nama yang sama sudah ada (lewati)",
+        help="Timpa berkas jika berkas output dengan nama yang sama sudah ada (gunakan --no-overwrite untuk melewati)",
     )
     parser.add_argument(
         "-r", "--recursive",

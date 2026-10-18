@@ -129,8 +129,7 @@ python main.py -m 0
 | `-f` | `--file` | String | `None` | Path ke berkas spesifik (mode single-file) |
 | `-q` | `--quality` | Integer | `80` | Kualitas kompresi WebP (1 - 100) |
 | `-l` | `--lossless` | Flag | `False` | Aktifkan kompresi tanpa penurunan kualitas (lossless) |
-| `-w` | `--overwrite` | Flag | `True` | Timpa berkas jika nama target sudah ada (Default: AKTIF) |
-| | `--no-overwrite` | Flag | - | Lewati berkas jika sudah ada di folder output |
+| `-w` | `--overwrite` / `--no-overwrite` | Boolean Flag | `True` (Aktif) | Timpa berkas jika nama target sudah ada (gunakan `--no-overwrite` untuk melewati) |
 | `-r` | `--recursive` | Flag | `False` | Pindai subfolder secara rekursif |
 | `-m` | `--method` | Integer | `6` | Usaha kompresi (0=tercepat, 6=paling optimal/kecil) |
 | `-L` | `--limit` | Integer | `None` | Batasi jumlah berkas yang dieksekusi (diurutkan ASC) |
